@@ -1,10 +1,17 @@
-import { useState } from "react";
-import "./App.css";
+import Navbar from "./components/Navbar";
+import SideMenu from "./components/SideMenu";
+import SvgView from "./components/SvgView";
+import Editor from "./components/Editor";
 
 function App() {
-  const [count, setCount] = useState(0);
-
-  return <></>;
+  return (
+    <div>
+      <Navbar />
+      <SideMenu />
+      <SvgView />
+      <Editor />
+    </div>
+  );
 }
 
 export default App;
