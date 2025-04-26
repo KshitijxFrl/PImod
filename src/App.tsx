@@ -5,11 +5,15 @@ import Editor from "./components/Editor";
 
 function App() {
   return (
-    <div>
+    <div className="h-screen flex flex-col">
       <Navbar />
-      <SideMenu />
-      <SvgView />
-      <Editor />
+      <div className="flex flex-grow">
+        <SideMenu />
+        <div className="flex flex-grow">
+          <SvgView svgPath="src\assets\svgs\boards\RapberryPi.svg" />
+          <Editor />
+        </div>
+      </div>
     </div>
   );
 }
