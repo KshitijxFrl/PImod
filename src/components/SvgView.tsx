@@ -144,44 +144,7 @@ const SvgView: React.FC<SvgViewProps> = ({ svgPath }) => {
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
       onWheel={handleWheel}
-    >
-      <div
-        style={{
-          transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`,
-          transformOrigin: "center",
-          cursor: isDragging ? "grabbing" : "grab",
-        }}
-        className="absolute transition-transform duration-100"
-        dangerouslySetInnerHTML={{ __html: svgContent }}
-      />
-
-      <div className="absolute bottom-4 right-4 bg-white rounded shadow p-2 flex gap-2">
-        <button
-          className="bg-gray-200 p-2 rounded hover:bg-gray-300"
-          onClick={() => setZoom((prev) => Math.min(3, prev + 0.1))}
-        >
-          +
-        </button>
-        <button
-          className="bg-gray-200 p-2 rounded hover:bg-gray-300"
-          onClick={() => setZoom((prev) => Math.max(0.1, prev - 0.1))}
-        >
-          -
-        </button>
-        <button
-          className="bg-gray-200 p-2 rounded hover:bg-gray-300"
-          onClick={() => {
-            setZoom(1);
-            setPosition({ x: 0, y: 0 });
-          }}
-        >
-          Reset
-        </button>
-        <div className="bg-gray-100 px-2 rounded flex items-center">
-          {Math.round(zoom * 100)}%
-        </div>
-      </div>
-    </div>
+    ></div>
   );
 };
 

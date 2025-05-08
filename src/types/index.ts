@@ -1,7 +1,7 @@
 //! Director type (help director of the application)
 
 export interface DirectorContextType {
-  connectionlink: number | string;
+  connectionlink: number | string | null;
   slected_component: any[];
-  selected_board: any[];
+  selected_boards: any[];
 }
