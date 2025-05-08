@@ -41,7 +41,7 @@
 <ellipse cx="1270.5" cy="269.035" rx="26.5" ry="27" transform="rotate(-180 1270.5 269.035)" fill="black"/>
 <ellipse cx="1167.5" cy="269.392" rx="26.5" ry="27" transform="rotate(-180 1167.5 269.392)" fill="black"/>
 <ellipse cx="1270.5" cy="193" rx="26.5" ry="27" transform="rotate(-180 1270.5 193)" fill="black"/>
-<ellipse cx="1168.5" cy="196.35" rx="26.5" ry="27" transform="rotate(-180 1168.5 196.35)" fill="black"/>
+<ellipse id="pin-001" cx="1168.5" cy="196.35" rx="26.5" ry="27" transform="rotate(-180 1168.5 196.35)" fill="black"/>
 <rect x="1353" y="2119" width="367" height="329" rx="8" transform="rotate(180 1353 2119)" fill="#C0BCBC" stroke="black" stroke-width="4"/>
 <rect x="772.998" y="2122" width="249" height="261" rx="12" transform="rotate(180 772.998 2122)" fill="#D9D9D9" stroke="black" stroke-width="4"/>
 <rect x="412" y="2123.23" width="249" height="261" rx="12" transform="rotate(180 412 2123.23)" fill="#D9D9D9" stroke="black" stroke-width="4"/>
