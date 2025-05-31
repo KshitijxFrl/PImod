@@ -10,7 +10,7 @@ function App() {
       <div className="flex flex-grow">
         <SideMenu />
         <div className="flex flex-grow">
-          <SvgView svgPath="src\assets\svgs\boards\RapberryPi.svg" />
+          <SvgView />
           <Editor />
         </div>
       </div>

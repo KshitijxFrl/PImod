@@ -1,150 +1,102 @@
-import { useState, useRef, useEffect } from "react";
+// import React from "react";
+// import { useDirector } from "./DirectorContext";
 
-interface SvgViewProps {
-  svgPath: string; // Path to the SVG file
-}
+// const SvgView: React.FC = () => {
+//   const { selected_boards, slected_component } = useDirector();
+//   return (
+//     <div className="relative w-full h-full overflow-hidden bg-gray-100">
+//       {selected_boards}
+//     </div>
+//   );
+// };
 
-type PinState = "default" | "selected" | "added";
+// export default SvgView;
 
-const SvgView: React.FC<SvgViewProps> = ({ svgPath }) => {
-  const [svgContent, setSvgContent] = useState<string>("");
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+import React, { useEffect, useRef, useState } from "react";
+import { useDirector } from "./DirectorContext";
+
+// Load all board SVGs
+const boardSvgs = import.meta.glob("../assets/svgs/boards/*.svg", {
+  as: "raw",
+  eager: true,
+});
+
+const SvgView: React.FC = () => {
+  const { selected_boards, slected_component, setSlectedComponent } =
+    useDirector();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [svgContent, setSvgContent] = useState<string | null>(null);
   const [zoom, setZoom] = useState(1);
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [pinStates, setPinStates] = useState<Record<string, PinState>>({});
 
-  const svgContainerRef = useRef<HTMLDivElement>(null);
+  const selectedBoardName = selected_boards[0];
+  const boardKey = `../assets/svgs/boards/${selectedBoardName}.svg`;
 
   useEffect(() => {
-    const fetchSvg = async () => {
-      try {
-        const response = await fetch(svgPath);
-        const svgText = await response.text();
-        setSvgContent(svgText);
-      } catch (error) {
-        console.error("Error loading SVG:", error);
-      }
-    };
-    fetchSvg();
-  }, [svgPath]);
+    if (boardKey in boardSvgs) {
+      const rawSvg = boardSvgs[boardKey] as string;
+      setSvgContent(rawSvg);
+    } else {
+      console.error("SVG not found for board:", boardKey);
+    }
+  }, [selectedBoardName]);
 
   useEffect(() => {
-    if (!svgContent || !svgContainerRef.current) return;
+    if (!svgContent || !containerRef.current) return;
 
-    const container = svgContainerRef.current;
+    const svgEl = containerRef.current.querySelector("svg");
+    if (!svgEl) return;
 
-    const handleSvgReady = () => {
-      const svgElement = container.querySelector("svg");
-      if (!svgElement) return;
+    const pins = svgEl.querySelectorAll("[id^=pin-]");
 
-      const allElements =
-        svgElement.querySelectorAll<SVGElement>("[id^='pin-']");
-      const pinPattern = /^pin-0([1-9]|[1-3][0-9]|40)$/;
+    pins.forEach((el) => {
+      el.setAttribute("style", "cursor:pointer; transition: fill 0.2s");
 
-      allElements.forEach((el) => {
+      el.addEventListener("click", () => {
         const id = el.id;
-        if (!id || !pinPattern.test(id)) return;
+        const isSelected = slected_component.includes(id);
 
-        el.style.cursor = "pointer";
-        el.style.transition = "fill 0.2s";
-
-        // Set initial fill if not already tracked
-        if (!pinStates[id]) {
+        if (isSelected) {
           el.setAttribute("fill", "black");
-        }
-
-        // Event Handlers
-        const handleMouseEnter = () => {
-          const currentState = pinStates[id] || "default";
-          if (currentState === "default") el.setAttribute("fill", "yellow");
-        };
-
-        const handleMouseLeave = () => {
-          const state = pinStates[id] || "default";
-          updateFill(el, state);
-        };
-
-        const handleClick = () => {
-          setPinStates((prev) => {
-            const current = prev[id] || "default";
-            const newState =
-              current === "default"
-                ? "selected"
-                : current === "selected"
-                ? "added"
-                : "default";
-            updateFill(el, newState);
-            return { ...prev, [id]: newState };
-          });
-        };
-
-        el.addEventListener("mouseenter", handleMouseEnter);
-        el.addEventListener("mouseleave", handleMouseLeave);
-        el.addEventListener("click", handleClick);
-      });
-    };
-
-    const updateFill = (el: SVGElement, state: PinState) => {
-      switch (state) {
-        case "selected":
-          el.setAttribute("fill", "green");
-          break;
-        case "added":
+          setSlectedComponent((prev) => prev.filter((p) => p !== id));
+        } else {
           el.setAttribute("fill", "blue");
-          break;
-        default:
-          el.setAttribute("fill", "black");
-      }
-    };
-
-    const observer = new MutationObserver(() => handleSvgReady());
-
-    observer.observe(container, {
-      childList: true,
-      subtree: true,
+          setSlectedComponent((prev) => [...prev, id]);
+        }
+      });
     });
-
-    return () => observer.disconnect();
-  }, [svgContent, pinStates]);
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    const target = e.target as Element;
-    if (target.tagName?.toLowerCase() === "svg" || !target.id) {
-      setIsDragging(true);
-      setDragStart({ x: e.clientX, y: e.clientY });
-    }
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (isDragging) {
-      const dx = e.clientX - dragStart.x;
-      const dy = e.clientY - dragStart.y;
-      setPosition((prev) => ({ x: prev.x + dx, y: prev.y + dy }));
-      setDragStart({ x: e.clientX, y: e.clientY });
-    }
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
+  }, [svgContent, slected_component, setSlectedComponent]);
 
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
     const delta = e.deltaY < 0 ? 0.1 : -0.1;
-    setZoom((prev) => Math.max(0.1, Math.min(3, prev + delta)));
+    setZoom((prev) => Math.min(3, Math.max(0.5, prev + delta)));
   };
 
   return (
     <div
-      ref={svgContainerRef}
+      ref={containerRef}
       className="relative w-full h-full overflow-hidden bg-gray-100"
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
       onWheel={handleWheel}
-    ></div>
+    >
+      {svgContent && (
+        <div
+          className="absolute origin-center"
+          style={{
+            transform: `scale(${zoom})`,
+            transformOrigin: "center center",
+          }}
+          dangerouslySetInnerHTML={{ __html: svgContent }}
+        />
+      )}
+      <div className="absolute bottom-4 right-4 bg-white rounded shadow p-2 flex items-center gap-2">
+        <button onClick={() => setZoom((z) => Math.min(3, z + 0.1))}>+</button>
+        <button onClick={() => setZoom((z) => Math.max(0.5, z - 0.1))}>
+          −
+        </button>
+        <button onClick={() => setZoom(1)}>Reset</button>
+        <span>{Math.round(zoom * 100)}%</span>
+      </div>
+    </div>
   );
 };
 
